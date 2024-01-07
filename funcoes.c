@@ -7,92 +7,97 @@
 #include <stdlib.h>
 #include <string.h>
 
+// Função auxiliar para converter um caractere para UFP6
+char *converterCaracterParaUFP6(char caractere) {
+    // Tabela de codificação UFP6 para dígitos e letras minúsculas
+    const char *ufp6Table[36] = {
+            "000000", "000001", "000010", "000011", "000100", "000101", "000110", "000111", "001000", "001001",
+            "001010", "001011", "001100", "001101", "001110", "001111", "010000", "010001", "010010", "010011",
+            "010100",
+            "010101", "010110", "010111", "0011000", "011001", "011010", "011011", "011100", "011101", "011110",
+            "011111", "100000", "100001", "100010", "100011"
+    };
 
-// Função auxiliar para converter um caractere para sua representação UFP6
- char* converterCaracterParaUFP6(char caractere) {
-    // Definindo a representação UFP6 para dígitos e letras
-    static const char *ufp6Digits[] = {"0", "1", "10", "11", "100", "101", "110", "111", "1000", "1001"};
-    static const char *ufp6Letters[] = {"1010", "1011", "1100", "1101", "1110", "1111", "10000", "10001", "10010", "10011",
-                                        "10100", "10101", "10110", "10111", "11000", "11001", "11010", "11011", "11100", "11101",
-                                        "11110", "11111", "100000", "100001", "100010", "100011", "100100", "100101", "100110",
-                                        "100111", "101000", "101001", "101010", "101011", "101100", "101101", "101110", "101111",
-                                        "110000", "110001", "110010", "110011", "110100", "110101", "110110", "110111", "111000",
-                                        "111001", "111010", "111011", "111100", "111101", "111110", "111111"};
+    char *codigoUFP6 = NULL;
 
-    char *ufp6;
-
-    // Verificar se o caractere é um dígito
     if (caractere >= '0' && caractere <= '9') {
-        ufp6 = strdup(ufp6Digits[caractere - '0']);
-    }
-        // Verificar se o caractere é uma letra maiúscula
-    else if (caractere >= 'A' && caractere <= 'Z') {
-        ufp6 = strdup(ufp6Letters[caractere - 'A']);
-    }
-        // Verificar se o caractere é uma letra minúscula
-    else if (caractere >= 'a' && caractere <= 'z') {
-        ufp6 = strdup(ufp6Letters[caractere - 'a']);
-    }
-        // Caractere não suportado
-    else {
-        ufp6 = strdup("");  // Caractere não suportado, retorna string vazia
+        // Remover zeros à esquerda
+        codigoUFP6 = strdup(ufp6Table[caractere - '0'] + strspn(ufp6Table[caractere - '0'], "0"));
+    } else if (caractere >= 'a' && caractere <= 'z') {
+        // Remover zeros à esquerda
+        codigoUFP6 = strdup(ufp6Table[caractere - 'a' + 10] + strspn(ufp6Table[caractere - 'a' + 10], "0"));
+    } else {
+        // Caracteres não suportados (ignorados na codificação)
+        codigoUFP6 = strdup("");
     }
 
-    return ufp6;
+    return codigoUFP6;
 }
 
-// Função para converter uma palavra para sua representação UFP6
-char* converterPalavraParaUFP6(const char *palavra) {
-    // Alocar espaço para a representação UFP6 (máximo 6 bits por caractere)
-    char *ufp6 = (char *)malloc((strlen(palavra) * 6) + 1);  // +1 para o terminador nulo
+// Função auxiliar para converter uma palavra para UFP6
+char *converterPalavraParaUFP6(const char *palavra) {
+    int tamanho = strlen(palavra);
+    char *ufp6 = (char *) malloc((tamanho * 6 + 1) * sizeof(char));
     ufp6[0] = '\0';  // Inicializar a string vazia
 
-    // Para cada caractere na palavra, converter e concatenar à representação UFP6
-    for (int i = 0; i < strlen(palavra); i++) {
-        char *caractereUFP6 = converterCaracterParaUFP6(palavra[i]);
-        strcat(ufp6, caractereUFP6);
-        free(caractereUFP6);
+    for (int i = 0; i < tamanho; i++) {
+        char *codigoCaracter = converterCaracterParaUFP6(palavra[i]);
+        strcat(ufp6, codigoCaracter);
+        free(codigoCaracter);
     }
 
     return ufp6;
 }
 
-
+// Função auxiliar para criar uma estrutura PalavraUFP6
 PalavraUFP6 criarPalavraUFP6(const char *palavra) {
-    PalavraUFP6 novaPalavra;
-    novaPalavra.palavra = strdup(palavra);
-    novaPalavra.ufp6 = converterPalavraParaUFP6(palavra);  // Correção aqui
-    return novaPalavra;
+    PalavraUFP6 palavraUFP6;
+    palavraUFP6.palavra = strdup(palavra);
+    palavraUFP6.ufp6 = converterPalavraParaUFP6(palavra);
+    return palavraUFP6;
 }
 
+// Função principal para criar um conjunto de palavras
 ConjuntoPalavras criarConjuntoPalavras(int tamanhoInicial) {
     ConjuntoPalavras conjunto;
-    conjunto.palavras = (PalavraUFP6 *)malloc(tamanhoInicial * sizeof(PalavraUFP6));
+    conjunto.palavras = (PalavraUFP6 *) malloc(tamanhoInicial * sizeof(PalavraUFP6));
     conjunto.tamanho = 0;
     return conjunto;
 }
 
+// Função para adicionar uma palavra ao conjunto
 void adicionarPalavra(ConjuntoPalavras *conjunto, const char *palavra) {
     if (conjunto->tamanho % 10 == 0) {
-        conjunto->palavras = (PalavraUFP6 *)realloc(conjunto->palavras, (conjunto->tamanho + 10) * sizeof(PalavraUFP6));
+        conjunto->palavras = (PalavraUFP6 *) realloc(conjunto->palavras,
+                                                     (conjunto->tamanho + 10) * sizeof(PalavraUFP6));
     }
 
     conjunto->palavras[conjunto->tamanho] = criarPalavraUFP6(palavra);
     conjunto->tamanho++;
 }
 
+// Função para listar o conjunto de palavras
 void listarConjuntoPalavras(const ConjuntoPalavras *conjunto) {
     for (int i = 0; i < conjunto->tamanho; i++) {
         printf("Palavra: %s, UFP6: %s\n", conjunto->palavras[i].palavra, conjunto->palavras[i].ufp6);
     }
 }
 
+// Função para liberar a memória alocada pelo conjunto de palavras
+void liberarConjuntoPalavras(ConjuntoPalavras *conjunto) {
+    for (int i = 0; i < conjunto->tamanho; i++) {
+        free(conjunto->palavras[i].palavra);
+        free(conjunto->palavras[i].ufp6);
+    }
+    free(conjunto->palavras);
+}
+
 // Função auxiliar para gerar uma palavra aleatória
-char* gerarPalavraAleatoria(int comprimento) {
-    const char caracteresPermitidos[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+char *gerarPalavraAleatoria(int comprimento) {
+    const char caracteresPermitidos[] = "0123456789abcdefghijklmnopqrstuvwxyz";
     int numCaracteresPermitidos = strlen(caracteresPermitidos);
 
-    char* palavra = (char*)malloc((comprimento + 1) * sizeof(char));
+    char *palavra = (char *) malloc((comprimento + 1) * sizeof(char));
     for (int i = 0; i < comprimento; ++i) {
         palavra[i] = caracteresPermitidos[rand() % numCaracteresPermitidos];
     }
@@ -102,16 +107,16 @@ char* gerarPalavraAleatoria(int comprimento) {
 }
 
 // Função para inserir palavras aleatórias no conjunto
-void inserirPalavrasAleatorias(ConjuntoPalavras* conjunto, int numPalavras) {
+void inserirPalavrasAleatorias(ConjuntoPalavras *conjunto, int numPalavras) {
     for (int i = 0; i < numPalavras; ++i) {
-        char* palavraAleatoria = gerarPalavraAleatoria(7); // Altere conforme necessário
+        char *palavraAleatoria = gerarPalavraAleatoria(7); // Altere conforme necessário
         adicionarPalavra(conjunto, palavraAleatoria);
         free(palavraAleatoria);
     }
 }
 
 // Função para remover uma palavra do conjunto
-void removerPalavra(ConjuntoPalavras* conjunto, const char* palavra) {
+void removerPalavra(ConjuntoPalavras *conjunto, const char *palavra) {
     int indiceRemover = -1;
 
     for (int i = 0; i < conjunto->tamanho; ++i) {
@@ -125,30 +130,53 @@ void removerPalavra(ConjuntoPalavras* conjunto, const char* palavra) {
         free(conjunto->palavras[indiceRemover].palavra);
         free(conjunto->palavras[indiceRemover].ufp6);
 
-        // Deslocar as palavras à frente do índice
+        // Deslocar as palavras após o índice
         for (int i = indiceRemover; i < conjunto->tamanho - 1; ++i) {
             conjunto->palavras[i] = conjunto->palavras[i + 1];
         }
 
+        // Redimensionar o array se necessário
         conjunto->tamanho--;
 
-        // Redimensionar o array se necessário
         if (conjunto->tamanho % 10 == 0 && conjunto->tamanho > 0) {
-            conjunto->palavras = (PalavraUFP6*)realloc(conjunto->palavras, conjunto->tamanho * sizeof(PalavraUFP6));
+            conjunto->palavras = (PalavraUFP6 *) realloc(conjunto->palavras, conjunto->tamanho * sizeof(PalavraUFP6));
         }
     }
 }
+
+void removerPalavraPorIndice(ConjuntoPalavras *conjunto, int indice) {
+    if (indice >= 0 && indice < conjunto->tamanho) {
+        free(conjunto->palavras[indice].palavra);
+        free(conjunto->palavras[indice].ufp6);
+
+        // Deslocar as palavras após o índice
+        for (int i = indice; i < conjunto->tamanho - 1; ++i) {
+            conjunto->palavras[i] = conjunto->palavras[i + 1];
+        }
+
+        // Redimensionar o array se necessário
+        conjunto->tamanho--;
+
+        if (conjunto->tamanho % 10 == 0 && conjunto->tamanho > 0) {
+            conjunto->palavras = (PalavraUFP6 *) realloc(conjunto->palavras, conjunto->tamanho * sizeof(PalavraUFP6));
+        }
+    }
+}
+
 // Função para verificar se uma combinação de palavras do conjunto1 é igual a outra combinação do conjunto2
-int verificarCombinacoesIguais(const ConjuntoPalavras* conjunto1, const ConjuntoPalavras* conjunto2) {
+int verificarCombinacoesIguais(const ConjuntoPalavras *conjunto1, const ConjuntoPalavras *conjunto2) {
     for (int i = 0; i < conjunto1->tamanho; i++) {
         for (int j = 0; j < conjunto1->tamanho; j++) {
-            char* combinacao1 = (char*)malloc((strlen(conjunto1->palavras[i].ufp6) + strlen(conjunto1->palavras[j].ufp6) + 1) * sizeof(char));
+            char *combinacao1 = (char *) malloc(
+                    (strlen(conjunto1->palavras[i].ufp6) + strlen(conjunto1->palavras[j].ufp6) + 1) * sizeof(char));
             strcpy(combinacao1, conjunto1->palavras[i].ufp6);
             strcat(combinacao1, conjunto1->palavras[j].ufp6);
 
             for (int k = 0; k < conjunto2->tamanho; k++) {
                 for (int l = 0; l < conjunto2->tamanho; l++) {
-                    char* combinacao2 = (char*)malloc((strlen(conjunto2->palavras[k].ufp6) + strlen(conjunto2->palavras[l].ufp6) + 1) * sizeof(char));
+                    char *combinacao2 = (char *) malloc(
+                            (strlen(conjunto2->palavras[k].ufp6) + strlen(conjunto2->palavras[l].ufp6) + 1) *
+                            sizeof(char));
                     strcpy(combinacao2, conjunto2->palavras[k].ufp6);
                     strcat(combinacao2, conjunto2->palavras[l].ufp6);
 
@@ -170,7 +198,7 @@ int verificarCombinacoesIguais(const ConjuntoPalavras* conjunto1, const Conjunto
 }
 
 // Função para pesquisar palavras no conjunto que contenham a sequência de pesquisa
-ConjuntoPalavras pesquisarPalavras(const ConjuntoPalavras* conjunto, const char* sequencia) {
+ConjuntoPalavras pesquisarPalavras(const ConjuntoPalavras *conjunto, const char *sequencia) {
     ConjuntoPalavras palavrasEncontradas = criarConjuntoPalavras(10); // Inicialização com um tamanho arbitrário
 
     for (int i = 0; i < conjunto->tamanho; i++) {
@@ -183,7 +211,7 @@ ConjuntoPalavras pesquisarPalavras(const ConjuntoPalavras* conjunto, const char*
 }
 
 // Função para obter os códigos binários das palavras encontradas na pesquisa
-ConjuntoPalavras obterCodigosPalavrasEncontradas(const ConjuntoPalavras* conjunto, const char* sequencia) {
+ConjuntoPalavras obterCodigosPalavrasEncontradas(const ConjuntoPalavras *conjunto, const char *sequencia) {
     ConjuntoPalavras palavrasEncontradas = pesquisarPalavras(conjunto, sequencia);
 
     // Atualizar os códigos binários das palavras encontradas
@@ -196,229 +224,335 @@ ConjuntoPalavras obterCodigosPalavrasEncontradas(const ConjuntoPalavras* conjunt
 }
 
 // Função de comparação para qsort: ordem alfabética crescente
-int compararPalavrasCrescente(const void* a, const void* b) {
-    return strcmp(((PalavraUFP6*)a)->palavra, ((PalavraUFP6*)b)->palavra);
+int compararPalavrasCrescente(const void *a, const void *b) {
+    return strcmp(((PalavraUFP6 *) a)->palavra, ((PalavraUFP6 *) b)->palavra);
 }
 
 // Função de comparação para qsort: ordem alfabética decrescente
-int compararPalavrasDecrescente(const void* a, const void* b) {
-    return strcmp(((PalavraUFP6*)b)->palavra, ((PalavraUFP6*)a)->palavra);
+int compararPalavrasDecrescente(const void *a, const void *b) {
+    return strcmp(((PalavraUFP6 *) b)->palavra, ((PalavraUFP6 *) a)->palavra);
 }
 
 // Função de comparação para qsort: ordem de tamanho crescente
-int compararTamanhosCrescente(const void* a, const void* b) {
-    return strlen(((PalavraUFP6*)a)->palavra) - strlen(((PalavraUFP6*)b)->palavra);
+int compararTamanhosCrescente(const void *a, const void *b) {
+    return strlen(((PalavraUFP6 *) a)->palavra) - strlen(((PalavraUFP6 *) b)->palavra);
 }
 
 // Função de comparação para qsort: ordem de tamanho decrescente
-int compararTamanhosDecrescente(const void* a, const void* b) {
-    return strlen(((PalavraUFP6*)b)->palavra) - strlen(((PalavraUFP6*)a)->palavra);
+int compararTamanhosDecrescente(const void *a, const void *b) {
+    return strlen(((PalavraUFP6 *) b)->palavra) - strlen(((PalavraUFP6 *) a)->palavra);
 }
 
 // Função para ordenar o conjunto de palavras por critério específico
-void ordenarConjuntoPalavras(ConjuntoPalavras* conjunto, int criterio, int ordem) {
+void ordenarConjuntoPalavras(ConjuntoPalavras *conjunto, int criterio, int ordem) {
     switch (criterio) {
         case ALFABETICA:
-            qsort(conjunto->palavras, conjunto->tamanho, sizeof(PalavraUFP6), (ordem == CRESCENTE) ? compararPalavrasCrescente : compararPalavrasDecrescente);
+            qsort(conjunto->palavras, conjunto->tamanho, sizeof(PalavraUFP6),
+                  (ordem == CRESCENTE) ? compararPalavrasCrescente : compararPalavrasDecrescente);
             break;
         case TAMANHO:
-            qsort(conjunto->palavras, conjunto->tamanho, sizeof(PalavraUFP6), (ordem == CRESCENTE) ? compararTamanhosCrescente : compararTamanhosDecrescente);
+            qsort(conjunto->palavras, conjunto->tamanho, sizeof(PalavraUFP6),
+                  (ordem == CRESCENTE) ? compararTamanhosCrescente : compararTamanhosDecrescente);
             break;
-            // Adicione mais critérios de ordenação, se necessário
+
     }
 }
-WORDS_HOLDER criarWordsHolder() {
-    WORDS_HOLDER holder;
-    holder.conjuntoAlfanumerico1 = criarConjuntoPalavras(10);
-    holder.conjuntoAlfanumerico2 = criarConjuntoPalavras(10);
-    holder.conjuntoUFP61 = criarConjuntoPalavras(10);
-    holder.conjuntoUFP62 = criarConjuntoPalavras(10);
-    return holder;
-}
-
-void adicionarPalavraWordsHolder(WORDS_HOLDER* holder, const char* palavra1, const char* palavra2) {
-    adicionarPalavra(&holder->conjuntoAlfanumerico1, palavra1);
-    adicionarPalavra(&holder->conjuntoAlfanumerico2, palavra2);
-    adicionarPalavra(&holder->conjuntoUFP61, converterPalavraParaUFP6(palavra1));
-    adicionarPalavra(&holder->conjuntoUFP62, converterPalavraParaUFP6(palavra2));
-}
-//alinea a
-AD_WORDS_HOLDER criarADWordsHolder(int tamanhoInicial) {
-    AD_WORDS_HOLDER adArray;
-    adArray.tamanho = tamanhoInicial;
-    adArray.elementosInseridos = 0;
-    adArray.elementos = (VAL_AD_WORDS_HOLDER*)malloc(tamanhoInicial * sizeof(VAL_AD_WORDS_HOLDER));
-    return adArray;
-}
-//alinea b
-void redimensionarADWordsHolder(AD_WORDS_HOLDER* adArray, int novoTamanho) {
-    adArray->elementos = (VAL_AD_WORDS_HOLDER*)realloc(adArray->elementos, novoTamanho * sizeof(VAL_AD_WORDS_HOLDER));
-    adArray->tamanho = novoTamanho;
-}
-//alinea c
-void inserirElementoADWordsHolder(AD_WORDS_HOLDER* adArray, VAL_AD_WORDS_HOLDER novoElemento) {
-    if (adArray->elementosInseridos == adArray->tamanho) {
-        redimensionarADWordsHolder(adArray, adArray->tamanho * 2);
-    }
-
-    adArray->elementos[adArray->elementosInseridos] = novoElemento;
-    adArray->elementosInseridos++;
-}
-//alinea d
-void inserirElementoPosicaoADWordsHolder(AD_WORDS_HOLDER* adArray, VAL_AD_WORDS_HOLDER novoElemento, int posicao) {
-    if (posicao < 0 || posicao > adArray->elementosInseridos) {
-        printf("Posição inválida\n");
-        return;
-    }
-
-    if (adArray->elementosInseridos == adArray->tamanho) {
-        redimensionarADWordsHolder(adArray, adArray->tamanho * 2);
-    }
-
-    for (int i = adArray->elementosInseridos; i > posicao; i--) {
-        adArray->elementos[i] = adArray->elementos[i - 1];
-    }
-
-    adArray->elementos[posicao] = novoElemento;
-    adArray->elementosInseridos++;
-}
-//alinea d
-void eliminarElementoPosicaoADWordsHolder(AD_WORDS_HOLDER* adArray, int posicao) {
-    if (posicao < 0 || posicao >= adArray->elementosInseridos) {
-        printf("Posição inválida\n");
-        return;
-    }
-
-    for (int i = posicao; i < adArray->elementosInseridos - 1; i++) {
-        adArray->elementos[i] = adArray->elementos[i + 1];
-    }
-
-    adArray->elementosInseridos--;
-
-    // Reduzir a alocação se o número de elementos for significativamente menor que o tamanho total
-    if (adArray->elementosInseridos < adArray->tamanho / 2) {
-        redimensionarADWordsHolder(adArray, adArray->tamanho / 2);
-    }
-}
-//alinea e
-VAL_AD_WORDS_HOLDER* pesquisarElementoPorDataADWordsHolder(const AD_WORDS_HOLDER* adArray, const char* data) {
-    for (int i = 0; i < adArray->elementosInseridos; i++) {
-        if (strcmp(adArray->elementos[i].dataModificacao, data) == 0) {
-            return &(adArray->elementos[i]);
+// Função para comparar datas (retorna <0 se a primeira for anterior à segunda, 0 se iguais, >0 se posterior)
+    int compararDatas(Data data1, Data data2) {
+        if (data1.ano < data2.ano) {
+            return -1;
+        } else if (data1.ano > data2.ano) {
+            return 1;
+        } else {
+            // Os anos são iguais, comparar meses
+            if (data1.mes < data2.mes) {
+                return -1;
+            } else if (data1.mes > data2.mes) {
+                return 1;
+            } else {
+                // Os meses são iguais, comparar dias
+                if (data1.dia < data2.dia) {
+                    return -1;
+                } else if (data1.dia > data2.dia) {
+                    return 1;
+                } else {
+                    // As datas são iguais
+                    return 0;
+                }
+            }
         }
     }
 
-    return NULL;  // Elemento não encontrado
+
+
+//Requisito 8
+
+// Alínea a
+AD_WORDS_HOLDER criarAdWordsHolder(int tamanhoInicial) {
+    AD_WORDS_HOLDER adArray;
+    adArray.tamanho = tamanhoInicial;
+    adArray.elementosInseridos = 0;
+    adArray.array = (VAL_AD_WORDS_HOLDER *)malloc(tamanhoInicial * sizeof(VAL_AD_WORDS_HOLDER));
+    return adArray;
+}
+// Função para redimensionar o array dinâmico
+void redimensionarADWordsHolder(AD_WORDS_HOLDER *adArray, int novoTamanho) {
+    adArray->tamanho = novoTamanho;
+    adArray->array = realloc(adArray->array, novoTamanho * sizeof(VAL_AD_WORDS_HOLDER));
+}
+VAL_AD_WORDS_HOLDER criarValAdWordsHolder(WORDS_HOLDER dados, Data dataAtualizacao) {
+    VAL_AD_WORDS_HOLDER val;
+    val.wordsHolder = dados;
+    val.dataAtualizacao = dataAtualizacao;
+    return val;
 }
 
-int escreverConjuntoParaFicheiro(const ConjuntoPalavras *conjunto, const char *nomeFicheiro) {
-    FILE *ficheiro = fopen(nomeFicheiro, "w");
-    if (ficheiro == NULL) {
-        printf("Erro ao abrir o ficheiro para escrita.\n");
-        return 0;  // Falha na abertura do ficheiro
+void adicionarAoAdWordsHolder(AD_WORDS_HOLDER *ad_holder, VAL_AD_WORDS_HOLDER val) {
+    if (ad_holder->elementosInseridos == ad_holder->tamanho) {
+        redimensionarADWordsHolder(ad_holder, ad_holder->tamanho * 2);
+    }
+
+    ad_holder->array[ad_holder->elementosInseridos] = val;
+    ad_holder->elementosInseridos++;
+}
+
+// Alínea b
+void inserirOrdenadoPorData(AD_WORDS_HOLDER *ad_holder, VAL_AD_WORDS_HOLDER val) {
+    if (ad_holder->elementosInseridos == ad_holder->tamanho) {
+        redimensionarADWordsHolder(ad_holder, ad_holder->tamanho * 2);
+    }
+
+    int i;
+    for (i = ad_holder->elementosInseridos - 1; i >= 0; i--) {
+        if (compararDatas(val.dataAtualizacao, ad_holder->array[i].dataAtualizacao) > 0) {
+            ad_holder->array[i + 1] = ad_holder->array[i];
+        } else {
+            break;
+        }
+    }
+
+    ad_holder->array[i + 1] = val;
+    ad_holder->elementosInseridos++;
+}
+
+// Alínea c
+void inserirElementoADWordsHolder(AD_WORDS_HOLDER *adArray, VAL_AD_WORDS_HOLDER novoElemento) {
+    adicionarAoAdWordsHolder(adArray, novoElemento);
+}
+
+void inserirNoIndice(AD_WORDS_HOLDER *ad_holder, VAL_AD_WORDS_HOLDER val, int indice) {
+    if (indice >= 0 && indice <= ad_holder->elementosInseridos) {
+        if (ad_holder->elementosInseridos == ad_holder->tamanho) {
+            redimensionarADWordsHolder(ad_holder, ad_holder->tamanho * 2);
+        }
+
+        int i;
+        for (i = ad_holder->elementosInseridos - 1; i >= indice; i--) {
+            ad_holder->array[i + 1] = ad_holder->array[i];
+        }
+
+        ad_holder->array[indice] = val;
+        ad_holder->elementosInseridos++;
+    } else {
+        printf("Índice inválido para inserção.\n");
+    }
+}
+
+// Alínea d
+void inserirElementoPosicaoADWordsHolder(AD_WORDS_HOLDER *adArray, VAL_AD_WORDS_HOLDER novoElemento, int posicao) {
+    inserirNoIndice(adArray, novoElemento, posicao);
+}
+
+void eliminarElementoPosicaoADWordsHolder(AD_WORDS_HOLDER *adArray, int posicao) {
+    if (posicao >= 0 && posicao < adArray->elementosInseridos) {
+        for (int i = posicao; i < adArray->elementosInseridos - 1; i++) {
+            adArray->array[i] = adArray->array[i + 1];
+        }
+
+        adArray->elementosInseridos--;
+    } else {
+        printf("Posição inválida para eliminação.\n");
+    }
+}
+
+VAL_AD_WORDS_HOLDER *pesquisarElementoPorDataADWordsHolder(const AD_WORDS_HOLDER *adArray, const char *data) {
+    // Implemente a lógica de pesquisa aqui usando adArray->array[posicao]
+    return NULL;  // Substitua isso com o resultado da pesquisa
+}
+
+// Função para imprimir um AD_WORDS_HOLDER
+void imprimirADWordsHolder(AD_WORDS_HOLDER adArray) {
+    for (int i = 0; i < adArray.elementosInseridos; i++) {
+        printf("Elemento %d:\n", i + 1);
+        printf("  Data de Atualizacao: %d/%d/%d\n", adArray.array[i].dataAtualizacao.dia,
+               adArray.array[i].dataAtualizacao.mes, adArray.array[i].dataAtualizacao.ano);
+
+        printf("  Palavras:\n");
+        listarConjuntoPalavras(&adArray.array[i].wordsHolder.conjuntoAlfanumerico1);
+        // Adicione outras listagens conforme necessário
+
+        printf("\n");
+    }
+}
+
+// Função para pesquisar palavras e respectivos códigos UFP6 em determinados elementos do array
+void pesquisarPalavrasAdHolder(AD_WORDS_HOLDER *adArray, int posicao) {
+    if (posicao >= 0 && posicao < adArray->elementosInseridos) {
+        // Implemente a lógica de pesquisa aqui usando adArray->array[posicao]
+    } else {
+        printf("Posição inválida para pesquisa.\n");
+    }
+}
+
+// Função para escrever um conjunto de palavras em um arquivo de texto
+int escreverConjuntoParaFicheiroTexto(const ConjuntoPalavras *conjunto, const char *nomeFicheiro) {
+    FILE *arquivo = fopen(nomeFicheiro, "w");
+
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo para escrita.\n");
+        return 0; // Falha ao abrir o arquivo
     }
 
     for (int i = 0; i < conjunto->tamanho; i++) {
-        fprintf(ficheiro, "Palavra: %s, UFP6: %s\n", conjunto->palavras[i].palavra, conjunto->palavras[i].ufp6);
+        fprintf(arquivo, "%s\n", conjunto->palavras[i].palavra);
     }
 
-    fclose(ficheiro);
-    return 1;  // Operação bem-sucedida
+    fclose(arquivo);
+    return 1; // Sucesso
 }
 
-// Nova função para ler um conjunto de palavras de um ficheiro
-int lerConjuntoDeFicheiro(ConjuntoPalavras *conjunto, const char *nomeFicheiro) {
-    FILE *ficheiro = fopen(nomeFicheiro, "r");
-    if (ficheiro == NULL) {
-        printf("Erro ao abrir o ficheiro para leitura.\n");
-        return 0;  // Falha na abertura do ficheiro
+// Função para ler um conjunto de palavras de um arquivo de texto
+int lerConjuntoDeFicheiroTexto(ConjuntoPalavras *conjunto, const char *nomeFicheiro) {
+    FILE *arquivo = fopen(nomeFicheiro, "r");
+
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo para leitura.\n");
+        return 0; // Falha ao abrir o arquivo
     }
 
-    // Implementar a lógica de leitura do ficheiro e atualização do conjunto
-
-    fclose(ficheiro);
-    return 1;  // Operação bem-sucedida
-}
-
-// Nova função para escrever um AD_WORDS_HOLDER para um ficheiro
-int escreverADWordsHolderParaFicheiro(const AD_WORDS_HOLDER *adArray, const char *nomeFicheiro) {
-    FILE *ficheiro = fopen(nomeFicheiro, "wb");  // Modo "wb" para escrita binária
-    if (ficheiro == NULL) {
-        printf("Erro ao abrir o ficheiro para escrita.\n");
-        return 0;  // Falha na abertura do ficheiro
+    char linha[100]; // Ajuste o tamanho conforme necessário
+    while (fgets(linha, sizeof(linha), arquivo) != NULL) {
+        linha[strcspn(linha, "\n")] = '\0'; // Remover o caractere de nova linha
+        adicionarPalavra(conjunto, linha);
     }
 
-    // Implementar a lógica de escrita do AD_WORDS_HOLDER no ficheiro
-
-    fclose(ficheiro);
-    return 1;  // Operação bem-sucedida
+    fclose(arquivo);
+    return 1; // Sucesso
 }
 
-// Nova função para ler um AD_WORDS_HOLDER de um ficheiro
-int lerADWordsHolderDeFicheiro(AD_WORDS_HOLDER *adArray, const char *nomeFicheiro) {
-    FILE *ficheiro = fopen(nomeFicheiro, "rb");  // Modo "rb" para leitura binária
-    if (ficheiro == NULL) {
-        printf("Erro ao abrir o ficheiro para leitura.\n");
-        return 0;  // Falha na abertura do ficheiro
+// Função para escrever um AD_WORDS_HOLDER em um arquivo de texto
+int escreverADWordsHolderParaFicheiroTexto(const AD_WORDS_HOLDER *adArray, const char *nomeFicheiro) {
+    FILE *arquivo = fopen(nomeFicheiro, "w");
+
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo para escrita.\n");
+        return 0; // Falha ao abrir o arquivo
     }
 
-    // Implementar a lógica de leitura do ficheiro e atualização do AD_WORDS_HOLDER
+    for (int i = 0; i < adArray->elementosInseridos; i++) {
+        fprintf(arquivo, "Elemento %d: Data de atualizacao: %d/%d/%d\n", i + 1,
+                adArray->array[i].dataAtualizacao.dia, adArray->array[i].dataAtualizacao.mes, adArray->array[i].dataAtualizacao.ano);
+    }
 
-    fclose(ficheiro);
-    return 1;  // Operação bem-sucedida
+    fclose(arquivo);
+    return 1; // Sucesso
 }
 
+// Função para ler um AD_WORDS_HOLDER de um arquivo de texto
+// Função para ler um AD_WORDS_HOLDER de um arquivo de texto
+int lerADWordsHolderDeFicheiroTexto(AD_WORDS_HOLDER *adArray, const char *nomeFicheiro) {
+    FILE *arquivo = fopen(nomeFicheiro, "r");
+
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo para leitura.\n");
+        return 0; // Falha ao abrir o arquivo
+    }
+
+    // Variáveis temporárias para armazenar os dados lidos do arquivo
+    int dia, mes, ano;
+    char palavra[100];  // Ajuste o tamanho conforme necessário
+
+    while (fscanf(arquivo, "%s %d/%d/%d", palavra, &dia, &mes, &ano) == 4) {
+        // Criar uma nova instância de VAL_AD_WORDS_HOLDER
+        VAL_AD_WORDS_HOLDER novoElemento;
+        novoElemento.dataAtualizacao.dia = dia;
+        novoElemento.dataAtualizacao.mes = mes;
+        novoElemento.dataAtualizacao.ano = ano;
+
+        // Criar uma nova instância de WORDS_HOLDER e adicionar a palavra
+        WORDS_HOLDER wordsHolder;
+        wordsHolder.conjuntoAlfanumerico1 = criarConjuntoPalavras(10);
+        adicionarPalavra(&wordsHolder.conjuntoAlfanumerico1, palavra);
+
+        // Adicionar o VAL_AD_WORDS_HOLDER ao AD_WORDS_HOLDER
+        adicionarAoAdWordsHolder(adArray, novoElemento);
+    }
+
+    fclose(arquivo);
+    return 1; // Sucesso
+}
+
+// Função para escrever um conjunto de palavras e códigos UFP6 em um arquivo binário
 int escreverConjuntoParaFicheiroBinario(const ConjuntoPalavras *conjunto, const char *nomeFicheiro) {
-    FILE *ficheiro = fopen(nomeFicheiro, "wb");
-    if (ficheiro == NULL) {
-        printf("Erro ao abrir o ficheiro para escrita binária.\n");
-        return 0;  // Falha na abertura do ficheiro
+    FILE *arquivo = fopen(nomeFicheiro, "wb");
+
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo para escrita.\n");
+        return 0; // Falha ao abrir o arquivo
     }
 
-    // Implementar a lógica de escrita binária do conjunto no ficheiro
+    // Escrever o número total de palavras no conjunto
+    fwrite(&conjunto->tamanho, sizeof(int), 1, arquivo);
 
-    fclose(ficheiro);
-    return 1;  // Operação bem-sucedida
+    // Escrever cada palavra e código UFP6 no arquivo
+    for (int i = 0; i < conjunto->tamanho; ++i) {
+        // Escrever o comprimento da palavra
+        int comprimentoPalavra = strlen(conjunto->palavras[i].palavra);
+        fwrite(&comprimentoPalavra, sizeof(int), 1, arquivo);
+
+        // Escrever a palavra
+        fwrite(conjunto->palavras[i].palavra, sizeof(char), comprimentoPalavra, arquivo);
+
+        // Escrever o código UFP6
+        fwrite(&conjunto->palavras[i].ufp6, sizeof(int), 1, arquivo);
+    }
+
+    fclose(arquivo);
+    return 1; // Sucesso
 }
 
-// Nova função para ler um conjunto de palavras de um ficheiro binário
+// Função para ler um conjunto de palavras e códigos UFP6 de um arquivo binário
 int lerConjuntoDeFicheiroBinario(ConjuntoPalavras *conjunto, const char *nomeFicheiro) {
-    FILE *ficheiro = fopen(nomeFicheiro, "rb");
-    if (ficheiro == NULL) {
-        printf("Erro ao abrir o ficheiro para leitura binária.\n");
-        return 0;  // Falha na abertura do ficheiro
+    FILE *arquivo = fopen(nomeFicheiro, "rb");
+
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo para leitura.\n");
+        return 0; // Falha ao abrir o arquivo
     }
 
-    // Implementar a lógica de leitura binária do ficheiro e atualização do conjunto
+    // Ler o número total de palavras no conjunto
+    fread(&conjunto->tamanho, sizeof(int), 1, arquivo);
 
-    fclose(ficheiro);
-    return 1;  // Operação bem-sucedida
-}
+    // Alocar espaço para as palavras no conjunto
+    conjunto->palavras = (PalavraUFP6 *)malloc(conjunto->tamanho * sizeof(PalavraUFP6));
 
-// Nova função para escrever um AD_WORDS_HOLDER para um ficheiro binário
-int escreverADWordsHolderParaFicheiroBinario(const AD_WORDS_HOLDER *adArray, const char *nomeFicheiro) {
-    FILE *ficheiro = fopen(nomeFicheiro, "wb");
-    if (ficheiro == NULL) {
-        printf("Erro ao abrir o ficheiro para escrita binária.\n");
-        return 0;  // Falha na abertura do ficheiro
+    // Ler cada palavra e código UFP6 do arquivo
+    for (int i = 0; i < conjunto->tamanho; ++i) {
+        // Ler o comprimento da palavra
+        int comprimentoPalavra;
+        fread(&comprimentoPalavra, sizeof(int), 1, arquivo);
+
+        // Alocar espaço para a palavra
+        conjunto->palavras[i].palavra = (char *)malloc((comprimentoPalavra + 1) * sizeof(char));
+
+        // Ler a palavra
+        fread(conjunto->palavras[i].palavra, sizeof(char), comprimentoPalavra, arquivo);
+        conjunto->palavras[i].palavra[comprimentoPalavra] = '\0'; // Adicionar terminador nulo
+
+        // Ler o código UFP6
+        fread(&conjunto->palavras[i].ufp6, sizeof(int), 1, arquivo);
     }
 
-    // Implementar a lógica de escrita binária do AD_WORDS_HOLDER no ficheiro
-
-    fclose(ficheiro);
-    return 1;  // Operação bem-sucedida
-}
-
-// Nova função para ler um AD_WORDS_HOLDER de um ficheiro binário
-int lerADWordsHolderDeFicheiroBinario(AD_WORDS_HOLDER *adArray, const char *nomeFicheiro) {
-    FILE *ficheiro = fopen(nomeFicheiro, "rb");
-    if (ficheiro == NULL) {
-        printf("Erro ao abrir o ficheiro para leitura binária.\n");
-        return 0;  // Falha na abertura do ficheiro
-    }
-
-    // Implementar a lógica de leitura binária do ficheiro e atualização do AD_WORDS_HOLDER
-
-    fclose(ficheiro);
-    return 1;  // Operação bem-sucedida
+    fclose(arquivo);
+    return 1; // Sucesso
 }
