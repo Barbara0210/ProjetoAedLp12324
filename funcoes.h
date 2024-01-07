@@ -111,6 +111,13 @@ void imprimirADWordsHolder(AD_WORDS_HOLDER adArray);
 
 void pesquisarPalavrasAdHolder(AD_WORDS_HOLDER *adArray, int posicao);
 
+void inserirElementoOrdenado(AD_WORDS_HOLDER *adArray, VAL_AD_WORDS_HOLDER elemento);
+void inserirElementoNaPosicao(AD_WORDS_HOLDER *adArray, VAL_AD_WORDS_HOLDER elemento, int posicao);
+void eliminarElementoNaPosicao(AD_WORDS_HOLDER *adArray, int posicao);
+void pesquisarPalavrasEmElementos(AD_WORDS_HOLDER *adArray, const char *palavraPesquisa);
+void liberarADWordsHolder(AD_WORDS_HOLDER *adArray);
+void listarElementosADWordsHolder(AD_WORDS_HOLDER *adArray);
+
 //Requisito11
 int escreverConjuntoParaFicheiroBinario(const ConjuntoPalavras *conjunto, const char *nomeFicheiro);
 

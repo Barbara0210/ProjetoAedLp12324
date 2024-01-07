@@ -232,7 +232,7 @@ void testeLerConjuntoTexto() {
 
     liberarConjuntoPalavras(&conjuntoTeste);
 }
-
+/*
 // Função de teste para escrever um AD_WORDS_HOLDER em um arquivo de texto
 void testeEscreverADWordsHolderTexto() {
     AD_WORDS_HOLDER adArrayTeste = criarAdWordsHolder(10);
@@ -305,6 +305,46 @@ void testeEscreverLerConjuntoBinario() {
     liberarConjuntoPalavras(&conjuntoTeste);
     printf("### Fim do Teste Escrever e Ler Conjunto Binario ###\n");
 }
+*/
+// Função para teste da pesquisa de palavras em determinados elementos do array
+void testarPesquisaPalavrasEmElementos(AD_WORDS_HOLDER *adArray, const char *palavraPesquisa) {
+    printf("Teste de Pesquisa de Palavras em Elementos:\n");
+    pesquisarPalavrasEmElementos(adArray, palavraPesquisa);
+    printf("\n");
+}
+
+// Função para teste da eliminação de um elemento no array em uma posição específica
+void testarEliminarElementoNaPosicao(AD_WORDS_HOLDER *adArray, int posicao) {
+    printf("Teste de Eliminacao de Elemento na Posicao %d:\n", posicao);
+    eliminarElementoNaPosicao(adArray, posicao);
+    printf("Elementos no array apos eliminacao: %d\n", adArray->elementosInseridos);
+    printf("\n");
+}
+
+// Função para teste da inserção de um elemento no array em uma posição específica
+void testarInserirElementoNaPosicao(AD_WORDS_HOLDER *adArray, VAL_AD_WORDS_HOLDER elemento, int posicao) {
+    printf("Teste de Insercao de Elemento na Posicao %d:\n", posicao);
+    inserirElementoNaPosicao(adArray, elemento, posicao);
+    printf("Elementos no array apos insercao: %d\n", adArray->elementosInseridos);
+    printf("\n");
+}
+
+// Função para teste da inserção de um elemento no array, ordenado cronologicamente pelas datas de modificação
+void testarInserirElementoOrdenado(AD_WORDS_HOLDER *adArray, VAL_AD_WORDS_HOLDER elemento) {
+    printf("Teste de Insercao de Elemento Ordenado:\n");
+    inserirElementoOrdenado(adArray, elemento);
+    printf("Elementos no array apos insercao ordenada: %d\n", adArray->elementosInseridos);
+    printf("\n");
+}
+
+// Função para teste de criação e/ou redimensionamento do array dinâmico
+void testarRedimensionarADWordsHolder(AD_WORDS_HOLDER *adArray, int novoTamanho) {
+    printf("Teste de Redimensionamento do Array Dinamico:\n");
+    redimensionarADWordsHolder(adArray, novoTamanho);
+    printf("Tamanho do array apos redimensionamento: %d\n", adArray->tamanho);
+    printf("\n");
+}
+
 
 int main() {
     // Chamar a função de teste do Requisito 1
@@ -322,6 +362,40 @@ int main() {
    // testeLerADWordsHolderTexto();
    // testeEscreverLerConjuntoBinario();
 
+
+    // Criar o array dinâmico
+    AD_WORDS_HOLDER adArray;
+    adArray.tamanho = 5;
+    adArray.elementosInseridos = 0;
+    adArray.array = (VAL_AD_WORDS_HOLDER *)malloc(adArray.tamanho * sizeof(VAL_AD_WORDS_HOLDER));
+
+    // Criar elementos de teste
+    VAL_AD_WORDS_HOLDER elementoTeste1 = {.dataAtualizacao = {1, 1, 2023}};
+    VAL_AD_WORDS_HOLDER elementoTeste2 = {.dataAtualizacao = {2, 1, 2023}};
+    VAL_AD_WORDS_HOLDER elementoTeste3 = {.dataAtualizacao = {1, 2, 2023}};
+    VAL_AD_WORDS_HOLDER elementoTeste4 = {.dataAtualizacao = {1, 1, 2022}};
+
+    // Testar inserções e ordenação
+    testarInserirElementoOrdenado(&adArray, elementoTeste1);
+    testarInserirElementoOrdenado(&adArray, elementoTeste2);
+    testarInserirElementoOrdenado(&adArray, elementoTeste3);
+    testarInserirElementoOrdenado(&adArray, elementoTeste4);
+
+    // Testar pesquisa de palavras
+    testarPesquisaPalavrasEmElementos(&adArray, "teste");
+
+    // Testar inserção na posição específica
+    VAL_AD_WORDS_HOLDER elementoTesteNovo = {.dataAtualizacao = {3, 1, 2023}};
+    testarInserirElementoNaPosicao(&adArray, elementoTesteNovo, 2);
+
+    // Testar eliminação na posição específica
+    testarEliminarElementoNaPosicao(&adArray, 1);
+
+    // Testar redimensionamento do array
+    testarRedimensionarADWordsHolder(&adArray, 10);
+
+    // Liberar a memória alocada
+    liberarADWordsHolder(&adArray);
 
     return 0;
 }

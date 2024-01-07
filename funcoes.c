@@ -295,6 +295,7 @@ AD_WORDS_HOLDER criarAdWordsHolder(int tamanhoInicial) {
     adArray.array = (VAL_AD_WORDS_HOLDER *)malloc(tamanhoInicial * sizeof(VAL_AD_WORDS_HOLDER));
     return adArray;
 }
+
 // Função para redimensionar o array dinâmico
 void redimensionarADWordsHolder(AD_WORDS_HOLDER *adArray, int novoTamanho) {
     adArray->tamanho = novoTamanho;
@@ -306,6 +307,7 @@ VAL_AD_WORDS_HOLDER criarValAdWordsHolder(WORDS_HOLDER dados, Data dataAtualizac
     val.dataAtualizacao = dataAtualizacao;
     return val;
 }
+
 
 void adicionarAoAdWordsHolder(AD_WORDS_HOLDER *ad_holder, VAL_AD_WORDS_HOLDER val) {
     if (ad_holder->elementosInseridos == ad_holder->tamanho) {
@@ -335,6 +337,29 @@ void inserirOrdenadoPorData(AD_WORDS_HOLDER *ad_holder, VAL_AD_WORDS_HOLDER val)
     ad_holder->elementosInseridos++;
 }
 
+// Função para inserir um elemento no array, ordenado cronologicamente pelas datas de modificação
+void inserirElementoOrdenado(AD_WORDS_HOLDER *adArray, VAL_AD_WORDS_HOLDER elemento) {
+    if (adArray->elementosInseridos == adArray->tamanho) {
+        // Redimensionar o array se estiver cheio
+        redimensionarADWordsHolder(adArray, adArray->tamanho * 2);
+    }
+
+    int i = adArray->elementosInseridos - 1;
+    while (i >= 0 && (elemento.dataAtualizacao.ano < adArray->array[i].dataAtualizacao.ano ||
+                      (elemento.dataAtualizacao.ano == adArray->array[i].dataAtualizacao.ano &&
+                       (elemento.dataAtualizacao.mes < adArray->array[i].dataAtualizacao.mes ||
+                        (elemento.dataAtualizacao.mes == adArray->array[i].dataAtualizacao.mes &&
+                         elemento.dataAtualizacao.dia < adArray->array[i].dataAtualizacao.dia))))) {
+        // Deslocar elementos maiores para a direita
+        adArray->array[i + 1] = adArray->array[i];
+        i--;
+    }
+
+    // Inserir o novo elemento
+    adArray->array[i + 1] = elemento;
+    adArray->elementosInseridos++;
+}
+
 // Alínea c
 void inserirElementoADWordsHolder(AD_WORDS_HOLDER *adArray, VAL_AD_WORDS_HOLDER novoElemento) {
     adicionarAoAdWordsHolder(adArray, novoElemento);
@@ -358,6 +383,28 @@ void inserirNoIndice(AD_WORDS_HOLDER *ad_holder, VAL_AD_WORDS_HOLDER val, int in
     }
 }
 
+// Função para inserir um elemento no array numa dada posição/índice, ajustando as posições dos restantes elementos
+void inserirElementoNaPosicao(AD_WORDS_HOLDER *adArray, VAL_AD_WORDS_HOLDER elemento, int posicao) {
+    if (posicao < 0 || posicao > adArray->elementosInseridos) {
+        printf("Posição inválida para inserção.\n");
+        return;
+    }
+
+    if (adArray->elementosInseridos == adArray->tamanho) {
+        // Redimensionar o array se estiver cheio
+        redimensionarADWordsHolder(adArray, adArray->tamanho * 2);
+    }
+
+    // Deslocar elementos maiores para a direita
+    for (int i = adArray->elementosInseridos - 1; i >= posicao; i--) {
+        adArray->array[i + 1] = adArray->array[i];
+    }
+
+    // Inserir o novo elemento na posição desejada
+    adArray->array[posicao] = elemento;
+    adArray->elementosInseridos++;
+}
+
 // Alínea d
 void inserirElementoPosicaoADWordsHolder(AD_WORDS_HOLDER *adArray, VAL_AD_WORDS_HOLDER novoElemento, int posicao) {
     inserirNoIndice(adArray, novoElemento, posicao);
@@ -375,9 +422,35 @@ void eliminarElementoPosicaoADWordsHolder(AD_WORDS_HOLDER *adArray, int posicao)
     }
 }
 
-VAL_AD_WORDS_HOLDER *pesquisarElementoPorDataADWordsHolder(const AD_WORDS_HOLDER *adArray, const char *data) {
-    // Implemente a lógica de pesquisa aqui usando adArray->array[posicao]
-    return NULL;  // Substitua isso com o resultado da pesquisa
+// Função para eliminar um elemento no array que está numa dada posição/índice, ajustando as posições dos restantes elementos
+void eliminarElementoNaPosicao(AD_WORDS_HOLDER *adArray, int posicao) {
+    if (posicao < 0 || posicao >= adArray->elementosInseridos) {
+        printf("Posição inválida para eliminação.\n");
+        return;
+    }
+
+    // Deslocar elementos à esquerda para preencher o espaço vago
+    for (int i = posicao; i < adArray->elementosInseridos - 1; i++) {
+        adArray->array[i] = adArray->array[i + 1];
+    }
+
+    adArray->elementosInseridos--;
+}
+
+// Função para pesquisar palavras e respectivos códigos UFP6 em determinados elementos do array
+void pesquisarPalavrasEmElementos(AD_WORDS_HOLDER *adArray, const char *palavraPesquisa) {
+    printf("Resultados da pesquisa por '%s':\n", palavraPesquisa);
+
+    for (int i = 0; i < adArray->elementosInseridos; i++) {
+        ConjuntoPalavras *conjunto = &adArray->array[i].wordsHolder.conjuntoAlfanumerico1;
+        ConjuntoPalavras palavrasEncontradas = pesquisarPalavras(conjunto, palavraPesquisa);
+
+        if (palavrasEncontradas.tamanho > 0) {
+            printf("Elemento %d:\n", i);
+            listarConjuntoPalavras(&palavrasEncontradas);
+            liberarConjuntoPalavras(&palavrasEncontradas);
+        }
+    }
 }
 
 // Função para imprimir um AD_WORDS_HOLDER
@@ -402,6 +475,38 @@ void pesquisarPalavrasAdHolder(AD_WORDS_HOLDER *adArray, int posicao) {
     } else {
         printf("Posição inválida para pesquisa.\n");
     }
+}
+
+// Função para liberar a memória alocada para o array dinâmico
+void liberarADWordsHolder(AD_WORDS_HOLDER *adArray) {
+    free(adArray->array);
+}
+// Função para listar os elementos no array
+// Função para listar os elementos no array
+void listarElementosADWordsHolder(AD_WORDS_HOLDER *adArray) {
+    printf("Elementos no array:\n");
+    for (int i = 0; i < adArray->elementosInseridos; i++) {
+        printf("Elemento %d:\n", i);
+        printf("Data de Atualizacao: %02d/%02d/%04d\n",
+               adArray->array[i].dataAtualizacao.dia,
+               adArray->array[i].dataAtualizacao.mes,
+               adArray->array[i].dataAtualizacao.ano);
+
+        printf("Conjunto Alfanumérico 1:\n");
+        listarConjuntoPalavras(&adArray->array[i].wordsHolder.conjuntoAlfanumerico1);
+
+        printf("Conjunto Alfanumérico 2:\n");
+        listarConjuntoPalavras(&adArray->array[i].wordsHolder.conjuntoAlfanumerico2);
+
+        printf("Conjunto UFP61:\n");
+        listarConjuntoPalavras(&adArray->array[i].wordsHolder.conjuntoUFP61);
+
+        printf("Conjunto UFP62:\n");
+        listarConjuntoPalavras(&adArray->array[i].wordsHolder.conjuntoUFP62);
+
+        printf("\n");
+    }
+    printf("\n");
 }
 
 // Função para escrever um conjunto de palavras em um arquivo de texto
