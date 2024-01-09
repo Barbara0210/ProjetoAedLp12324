@@ -3,8 +3,10 @@
 
 #include "funcoes.h"
 
-// Função de teste para verificar a criação e adição de palavras em um conjunto
-void testeRequisito1_2() {
+/**
+ * @brief Testa o Requisito 1 - Criar e manipular um conjunto de palavras.
+ */
+ void testeRequisito1_2() {
     printf("### Teste Requisito 1 ###\n");
 
     // Criar conjunto de palavras
@@ -23,7 +25,9 @@ void testeRequisito1_2() {
 
     printf("### Fim do Teste Requisito 1 ###\n");
 }
-
+/**
+ * @brief Testa o Requisito 3 - Inserir e remover palavras aleatórias de um conjunto.
+ */
 void testeRequisito3() {
     printf("### Teste Requisito 3 ###\n");
 
@@ -53,7 +57,9 @@ void testeRequisito3() {
 
     printf("### Fim do Teste Requisito 3 ###\n");
 }
-
+/**
+ * @brief Testa o Requisito 4 - Verificar combinações iguais entre dois conjuntos de palavras.
+ */
 void testeRequisito4() {
     printf("### Teste Requisito 4 ###\n");
 
@@ -85,7 +91,9 @@ void testeRequisito4() {
 
     printf("### Fim do Teste Requisito 4 ###\n");
 }
-
+/**
+ * @brief Testa o Requisito 5 - Pesquisar e obter códigos binários de palavras em conjuntos.
+ */
 void testeRequisito5() {
     printf("### Teste Requisito 5 ###\n");
 
@@ -135,8 +143,12 @@ void testeRequisito5() {
     printf("### Fim do Teste Requisito 5 ###\n");
 }
 
-// Função de teste para o requisito 6
-void testeRequisito6() {
+/**
+ * @brief Testa o Requisito 6 - Ordenar palavras em um conjunto por ordem alfabética e tamanho.
+ *
+ * O teste cria um conjunto de palavras, adiciona palavras a ele, lista o conjunto antes e depois
+ * de ordenar alfabeticamente (crescente) e por tamanho (decrescente).
+ */void testeRequisito6() {
     printf("### Teste Requisito 6 ###\n");
 
     // Criar conjunto de palavras
@@ -202,8 +214,14 @@ void testeRequisito6() {
 
 
     }*/
-// Função de teste para escrever um conjunto de palavras em um arquivo de texto
-void testeEscreverConjuntoTexto() {
+/**
+ * @brief Testa a escrita de um conjunto de palavras em um arquivo de texto.
+ *
+ * Esta função cria um conjunto de palavras, adiciona palavras a ele e tenta escrever o conjunto
+ * em um arquivo de texto chamado "conjunto_teste.txt". O teste imprime uma mensagem indicando
+ * se a operação de escrita foi bem-sucedida ou falhou.
+ */
+ void testeEscreverConjuntoTexto() {
     ConjuntoPalavras conjuntoTeste = criarConjuntoPalavras(10);
 
     adicionarPalavra(&conjuntoTeste, "teste1");
@@ -219,8 +237,14 @@ void testeEscreverConjuntoTexto() {
     liberarConjuntoPalavras(&conjuntoTeste);
 }
 
-// Função de teste para ler um conjunto de palavras de um arquivo de texto
-void testeLerConjuntoTexto() {
+/**
+ * @brief Testa a leitura de um conjunto de palavras a partir de um arquivo de texto.
+ *
+ * Esta função cria um conjunto de palavras vazio, tenta ler um conjunto de palavras do arquivo
+ * de texto chamado "conjunto_teste.txt" e imprime uma mensagem indicando se a operação de leitura
+ * foi bem-sucedida ou falhou. Se a leitura for bem-sucedida, a função também lista o conjunto de palavras lido.
+ */
+ void testeLerConjuntoTexto() {
     ConjuntoPalavras conjuntoTeste = criarConjuntoPalavras(10);
 
     if (lerConjuntoDeFicheiroTexto(&conjuntoTeste, "conjunto_teste.txt")) {
@@ -273,9 +297,16 @@ void testeLerADWordsHolderTexto() {
         printf("Falha ao ler o AD_WORDS_HOLDER.\n");
     }
 }
-
-// Função de teste para escrever e ler um conjunto de palavras em um arquivo binário
-void testeEscreverLerConjuntoBinario() {
+*/
+/**
+ * @brief Testa a escrita e leitura de um conjunto de palavras em um arquivo binário.
+ *
+ * Esta função cria um conjunto de palavras de teste, escreve esse conjunto em um arquivo binário
+ * chamado "conjunto_binario.bin" e, em seguida, tenta ler o conjunto de palavras do mesmo arquivo.
+ * Imprime mensagens indicando se as operações de escrita e leitura foram bem-sucedidas ou falharam.
+ * Se a leitura for bem-sucedida, a função também lista o conjunto de palavras lido.
+ */
+ void testeEscreverLerConjuntoBinario() {
     printf("### Teste Escrever e Ler Conjunto Binario ###\n");
 
     // Criar um conjunto de palavras para teste
@@ -305,7 +336,7 @@ void testeEscreverLerConjuntoBinario() {
     liberarConjuntoPalavras(&conjuntoTeste);
     printf("### Fim do Teste Escrever e Ler Conjunto Binario ###\n");
 }
-*/
+
 // Função para teste da pesquisa de palavras em determinados elementos do array
 void testarPesquisaPalavrasEmElementos(AD_WORDS_HOLDER *adArray, const char *palavraPesquisa) {
     printf("Teste de Pesquisa de Palavras em Elementos:\n");

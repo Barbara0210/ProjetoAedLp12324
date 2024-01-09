@@ -12,40 +12,55 @@
 #define DECRESCENTE 1
 #define ALFABETO "0123456789abcdefghijklmnopqrstuvwxyz"
 
+/**
+ * @brief Estrutura para armazenar uma palavra juntamente com seu código UFP6.
+ */
 typedef struct {
-    char *palavra;
-    char *ufp6;
+    char *palavra; /**< Ponteiro para a string que armazena a palavra. */
+    char *ufp6;    /**< Ponteiro para a string que armazena o código UFP6 correspondente à palavra. */
 } PalavraUFP6;
 
+/**
+ * @brief Estrutura para representar um conjunto de palavras com códigos UFP6.
+ */
 typedef struct {
-    PalavraUFP6 *palavras;
-    int tamanho;
+    PalavraUFP6 *palavras; /**< Ponteiro para um array de PalavraUFP6 representando as palavras no conjunto. */
+    int tamanho;           /**< Número atual de palavras no conjunto. */
 } ConjuntoPalavras;
 
 //requisito7
+/**
+ * @brief Estrutura para armazenar quatro conjuntos de palavras.
+ */
 typedef struct {
-    ConjuntoPalavras conjuntoAlfanumerico1;  // Matriz de palavras alfanuméricas do conjunto 1
-    ConjuntoPalavras conjuntoAlfanumerico2;  // Matriz de palavras alfanuméricas do conjunto 2
-    ConjuntoPalavras conjuntoUFP61;  // Matriz de palavras codificadas em UFP6 do conjunto 1
-    ConjuntoPalavras conjuntoUFP62;  // Matriz de palavras codificadas em UFP6 do conjunto 2
+    ConjuntoPalavras conjuntoAlfanumerico1; /**< Conjunto de palavras alfanuméricas do conjunto 1. */
+    ConjuntoPalavras conjuntoAlfanumerico2; /**< Conjunto de palavras alfanuméricas do conjunto 2. */
+    ConjuntoPalavras conjuntoUFP61;          /**< Conjunto de palavras codificadas em UFP6 do conjunto 1. */
+    ConjuntoPalavras conjuntoUFP62;          /**< Conjunto de palavras codificadas em UFP6 do conjunto 2. */
 } WORDS_HOLDER;
 
-// Estrutura que define a data
-typedef struct {
+
+/**
+ * @brief Estrutura para representar uma data.
+ */typedef struct {
     int dia, mes, ano;
 } Data;
 
-// Estrutura que define um VAL_AD_WORDS_HOLDER
+/**
+ * @brief Estrutura para armazenar informações sobre uma palavra e sua data de atualização.
+ */
 typedef struct {
-    WORDS_HOLDER wordsHolder;
-    Data dataAtualizacao;
+    WORDS_HOLDER wordsHolder;   /**< Estrutura que contém conjuntos de palavras relacionadas à palavra. */
+    Data dataAtualizacao;       /**< Data de atualização da palavra. */
 } VAL_AD_WORDS_HOLDER;
 
-// Estrutura que define o Array Dinâmico AD_WORDS_HOLDER
+/**
+ * @brief Estrutura para armazenar um array de VAL_AD_WORDS_HOLDER.
+ */
 typedef struct {
-    int tamanho;
-    int elementosInseridos;
-    VAL_AD_WORDS_HOLDER *array;
+    int tamanho;                   /**< Tamanho atual do array. */
+    int elementosInseridos;        /**< Número de elementos atualmente inseridos no array. */
+    VAL_AD_WORDS_HOLDER *array;    /**< Ponteiro para o array de VAL_AD_WORDS_HOLDER. */
 } AD_WORDS_HOLDER;
 
 
